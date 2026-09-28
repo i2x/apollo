@@ -197,6 +197,8 @@ concepts: [playtesting, mechanic-vs-rule, player-goal, meaningful-choice, kinds-
 
 **หลักการ:** ไฟล์ markdown เป็นแหล่งข้อมูลจริง viewer **อ่านอย่างเดียว** และไม่เก็บ state ของตัวเอง ทุก request อ่านไฟล์ใหม่จากดิสก์ แก้ไฟล์แล้วกด refresh ก็เห็นผลทันที
 
+**ขอบเขตไฟล์:** โฟลเดอร์ที่ชื่อขึ้นต้นด้วย `_` (เช่น `_templates/`) ไม่นับเป็นหน้า wiki ทั้งตัว viewer และตัวตรวจกติกาข้ามไป แต่ยังแสดงเป็นไฟล์ดิบได้
+
 **การรัน**
 - `npm run wiki` เปิด server ที่ `http://localhost:4000`
 - `npm run check` ตรวจกติกาใน terminal ถ้าเจอ error จะจบด้วย exit code 1
