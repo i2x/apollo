@@ -226,9 +226,9 @@ concepts: [playtesting, mechanic-vs-rule, player-goal, meaningful-choice, kinds-
 | warning | node ยัง `locked` ทั้งที่เงื่อนไข unlock ครบแล้ว |
 | warning | มีโปรเจกต์ `active` มากกว่า 1 โปรเจกต์ |
 
-**เทคโนโลยี:** Node.js (TypeScript) ใช้ dependency น้อยที่สุด ได้แก่ markdown parser, frontmatter parser และ Mermaid ที่เก็บไว้ในเครื่อง (vendored) ให้ใช้ได้แม้ไม่มีอินเทอร์เน็ต ส่วนตัวตรวจกติกาแยกเป็นโมดูลที่ไม่ผูกกับ server เพื่อให้ `npm run check` กับหน้าเว็บใช้โค้ดชุดเดียวกัน
+**เทคโนโลยี:** Node.js ≥ 23.6 รันไฟล์ TypeScript ได้โดยตรงโดยไม่ต้อง build ใช้ dependency แค่ 3 ตัว ได้แก่ `marked` (markdown), `yaml` (frontmatter) และ `mermaid` ซึ่งติดตั้งผ่าน npm แล้วเสิร์ฟจาก `node_modules` หลัง `npm install` ครั้งแรกจึงใช้ได้แม้ไม่มีอินเทอร์เน็ต ส่วนตัวตรวจกติกาแยกเป็นโมดูลที่ไม่ผูกกับ server เพื่อให้ `npm run check` กับหน้าเว็บใช้โค้ดชุดเดียวกัน server รับการเชื่อมต่อจาก `127.0.0.1` เท่านั้น
 
-**การทดสอบ:** มี unit test ของตัว resolve ลิงก์และตัวตรวจกติกาทุกข้อ โดยใช้ wiki จำลองขนาดเล็กใน `tests/fixtures/`
+**การทดสอบ:** `npm test` รัน unit test ของตัว resolve ลิงก์, ตัวตรวจกติกาทุกข้อ, การค้นหา, backlinks และ dashboard โดยแต่ละ test สร้าง wiki จำลองของตัวเองในโฟลเดอร์ชั่วคราว ส่วน `npm run typecheck` ใช้ตรวจ type
 
 **ไม่ทำในรุ่นนี้ (YAGNI):** แก้ไฟล์ในเบราว์เซอร์, login, deploy ขึ้นเว็บ, graph view แบบลากได้, live reload อัตโนมัติ
 
