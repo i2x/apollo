@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
-import { parse as parseYaml } from 'yaml';
+import matter from 'gray-matter';
 import { extractLinks } from './markdown.ts';
 
 export type Page = {
@@ -23,8 +23,6 @@ export type Wiki = {
   byId: Map<string, Page[]>;
   byPath: Map<string, Page>;
 };
-
-const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)/;
 
 /** Reads the whole wiki from disk. Cheap enough to call on every request. */
 export function loadWiki(root: string): Wiki {
@@ -68,18 +66,27 @@ function pageId(root: string, rel: string): string {
   return folder === '.' ? path.basename(root) : path.posix.basename(folder);
 }
 
+/** On unreadable frontmatter the whole file stays in the body, so the broken block is visible on the page. */
 export function splitFrontmatter(raw: string): { meta: Record<string, unknown>; metaError?: string; body: string } {
-  const match = FRONTMATTER.exec(raw);
-  if (!match) return { meta: {}, body: raw };
-  const body = raw.slice(match[0].length);
+  let parsed: { data: unknown; content: string };
   try {
-    const parsed: unknown = parseYaml(match[1]);
-    if (parsed == null) return { meta: {}, body };
-    if (typeof parsed !== 'object' || Array.isArray(parsed)) return { meta: {}, metaError: 'frontmatter ต้องเป็น key: value', body };
-    return { meta: parsed as Record<string, unknown>, body };
+    parsed = matter(raw);
   } catch (err) {
-    return { meta: {}, metaError: (err as Error).message.split('\n')[0], body };
+    return { meta: {}, metaError: (err as Error).message.split('\n')[0], body: raw };
   }
+  const { data, content } = parsed;
+  if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+    return { meta: {}, metaError: 'frontmatter ต้องเป็น key: value', body: content };
+  }
+  const meta = Object.fromEntries(Object.entries(data).map(([key, value]) => [key, plainValue(value)]));
+  return { meta, body: content };
+}
+
+// YAML reads `date: 2026-10-01` as a Date; the wiki treats it as the text it was written as.
+function plainValue(value: unknown): unknown {
+  if (value instanceof Date) return value.toISOString().slice(0, 10);
+  if (Array.isArray(value)) return value.map(plainValue);
+  return value;
 }
 
 export function text(page: Page, key: string): string | undefined {

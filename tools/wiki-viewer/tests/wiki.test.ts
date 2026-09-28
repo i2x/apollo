@@ -26,10 +26,15 @@ test('frontmatter is parsed and the first heading becomes the title', () => {
   assert.equal(page.title, 'Skill');
 });
 
-test('broken frontmatter is reported instead of thrown', () => {
-  const result = splitFrontmatter('---\nstatus: [unclosed\n---\nbody');
+test('broken frontmatter is reported instead of thrown, and kept visible in the body', () => {
+  const raw = '---\nstatus: [unclosed\n---\nbody';
+  const result = splitFrontmatter(raw);
   assert.ok(result.metaError);
-  assert.equal(result.body, 'body');
+  assert.equal(result.body, raw);
+});
+
+test('dates in frontmatter stay as written', () => {
+  assert.deepEqual(splitFrontmatter('---\ndate: 2026-10-01\n---\n').meta, { date: '2026-10-01' });
 });
 
 test('pages without frontmatter keep their whole body', () => {
